@@ -33,8 +33,7 @@ Token* LexicalAnalyzer::getNextToken()
   switch(token_class) {
     case IDENT:
       token_class = tokencode(line.front());
-      while(token_class == IDENT ||
-            token_class == NUMLIT) {
+      while(token_class == IDENT || token_class == NUMLIT) {
         parse();
         token_class = tokencode(line.front());
       }
@@ -132,8 +131,93 @@ TokenCodes LexicalAnalyzer::tokencode(char c) {
 }
 TokenCodes LexicalAnalyzer::lookup(char* token) {
   char* case_insensitive = lower(token);
-
-  return IDENT;
+  if (strcmp(case_insensitive, "begin") == 0)
+    return BEGINSYM;
+  else if (strcmp(case_insensitive, "boolean") == 0)
+    return BOOLSYM;
+  else if (strcmp(case_insensitive, "else") == 0)
+    return ELSESYM;
+  else if (strcmp(case_insensitive, "end") == 0)
+    return ENDSYM;
+  else if (strcmp(case_insensitive, "false") == 0)
+    return FALSESYM;
+  else if (strcmp(case_insensitive, "get") == 0)
+    return GETSYM;
+  else if (strcmp(case_insensitive, "if") == 0)
+    return IFSYM;
+  else if (strcmp(case_insensitive, "is") == 0)
+    return ISSYM;
+  else if (strcmp(case_insensitive, "integer") == 0)
+    return INTSYM;
+  else if (strcmp(case_insensitive, "loop") == 0)
+    return LOOPSYM;
+  else if (strcmp(case_insensitive, "newline") == 0)
+    return NEWLINE;
+  else if (strcmp(case_insensitive, "not") == 0)
+    return NOTSYM;
+  else if (strcmp(case_insensitive, "null") == 0)
+    return NULLSYM;
+  else if (strcmp(case_insensitive, "procedure") == 0)
+    return PROCSYM;
+  else if (strcmp(case_insensitive, "put") == 0)
+    return PUTSYM;
+  else if (strcmp(case_insensitive, "rem") == 0)
+    return REMSYM;
+  else if (strcmp(case_insensitive, "then") == 0)
+    return THENSYM;
+  else if (strcmp(case_insensitive, "true") == 0)
+    return TRUESYM;
+  else if (strcmp(case_insensitive, "while") == 0)
+    return WHILESYM;
+  else
+    return furtherlookup(token);
+  
+}
+TokenCodes LexicalAnalyzer::furtherlookup(char* token) {
+  switch(token[0]) {
+    case '+':
+      return PLUS;
+    case '-':
+      return MINUS;
+    case '*':
+      return TIMES;
+    case '=':
+      return EQL;
+    case '(':
+      return LPAREN;
+    case ')':
+      return RPAREN;
+    case ',':
+      return COMMA;
+    case ';':
+      return SEMICOLON;
+    case '/':
+      if (nextcharacter() == '=') {
+        parse();
+        return NEQ;
+      }
+      return SLASH;
+    case ':':
+      if (nextcharacter() == '=') {
+        parse();
+        return BECOMES;
+      }
+      return COLON;
+    case '<':
+      if (nextcharacter() == '=') {
+        parse();
+        return LEQ;
+      }
+      return LSS;
+    case '>':
+      if (nextcharacter() == '=') {
+        parse();
+        return GEQ;
+      }
+      return GTR;
+    default:
+      return IDENT;
+  }
 }
 char* LexicalAnalyzer::lower(char* token) {
 
@@ -144,6 +228,9 @@ char* LexicalAnalyzer::lower(char* token) {
     lowercase[i] = tolower(token[i]);
   }
   return lowercase;
+}
+char LexicalAnalyzer::nextcharacter() {
+  return line.front();
 }
 
 void LexicalAnalyzer::nextnonwhitespace() {

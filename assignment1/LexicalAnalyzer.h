@@ -18,8 +18,10 @@ class LexicalAnalyzer
 
     TokenCodes tokencode(char);
     TokenCodes lookup(char*);
+    TokenCodes furtherlookup(char*);
 
     char* lower(char*);
+    char nextcharacter();
     void nextline();
     void parse();
     void nextnonwhitespace();
