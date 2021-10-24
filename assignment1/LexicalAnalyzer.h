@@ -17,6 +17,9 @@ class LexicalAnalyzer
     char* lexeme;
 
     TokenCodes tokencode(char);
+    TokenCodes lookup(char*);
+
+    char* lower(char*);
     void nextline();
     void parse();
     void nextnonwhitespace();

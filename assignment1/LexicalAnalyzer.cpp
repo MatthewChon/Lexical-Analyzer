@@ -40,7 +40,7 @@ Token* LexicalAnalyzer::getNextToken()
       }
       t->setLexemeNumber(getCurrentCharPositionNumber());
       t->setLexemeString(lexeme);
-      t->setTokenCode(IDENT);
+      t->setTokenCode(lookup(lexeme));
       break;
     case NUMLIT:
       token_class = tokencode(line.front());
@@ -53,9 +53,20 @@ Token* LexicalAnalyzer::getNextToken()
       t->setTokenCode(NUMLIT);
       break;
     case NEWLINE:
+      t->setLexemeNumber(getCurrentCharPositionNumber());
+      t->setLexemeString("\\n");
+      t->setTokenCode(NEWLINE);
+      nextline();
+      break;
     case EOI:
       t->setLexemeNumber(getCurrentCharPositionNumber());
       t->setLexemeString("EOI");
+      t->setTokenCode(token_class);
+      break;
+    default:
+      t->setLexemeNumber(getCurrentCharPositionNumber());
+      token_class = lookup(lexeme);
+      t->setLexemeString(lexeme);
       t->setTokenCode(token_class);
   }
 
@@ -80,7 +91,34 @@ TokenCodes LexicalAnalyzer::tokencode(char c) {
       return NUMLIT;
     }
     else {
-      return NAL;
+      switch(c) {
+        case '+':
+          return PLUS;
+        case '-':
+          return MINUS;
+        case '*':
+          return TIMES;
+        case '=':
+          return EQL;
+        case '(':
+          return LPAREN;
+        case ')':
+          return RPAREN;
+        case ',':
+          return COMMA;
+        case ';':
+          return SEMICOLON;
+        case '/':
+          return SLASH;
+        case ':':
+          return COLON;
+        case '<':
+          return LSS;
+        case '>':
+          return GTR;
+        default:
+          return NAL;
+      }
     }
   }
   else {
@@ -92,17 +130,36 @@ TokenCodes LexicalAnalyzer::tokencode(char c) {
     }
   }
 }
+TokenCodes LexicalAnalyzer::lookup(char* token) {
+  char* case_insensitive = lower(token);
+
+  return IDENT;
+}
+char* LexicalAnalyzer::lower(char* token) {
+
+  int size = sizeof(token)/sizeof(token[0]);
+  char *lowercase = new char[size];
+  
+  for (int i = 0; i < size; ++i) {
+    lowercase[i] = tolower(token[i]);
+  }
+  return lowercase;
+}
+
 void LexicalAnalyzer::nextnonwhitespace() {
+
   while (!line.empty() && isspace(line.front())) {
     line.pop();
     current_character_position++;
   }
 }
 void LexicalAnalyzer::nextline() {
+
   string new_statement;
   current_character_position = 0;
 
   getline(*sourceCodeFile, new_statement);
+
   for (int i = 0; i < new_statement.length(); ++i) {
     line.push(new_statement.at(i));
   }
