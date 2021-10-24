@@ -26,6 +26,9 @@ Token* LexicalAnalyzer::getNextToken()
   t = new Token();
   lexeme_size = 0;
 
+  if (current_character_position < line.length())
+    nextnonwhitespace();
+    
   TokenCodes code = parse();
 
   switch(code) {
@@ -66,14 +69,7 @@ TokenCodes LexicalAnalyzer::parse() {
       lexeme[lexeme_size] = symbol;
       lexeme[++lexeme_size] = 0;
     }
-    if (isalpha(symbol)) {
-      return IDENT;
-    }
-    else if (isdigit(symbol)){
-      return NUMLIT;
-    }
-    else {
-    }
+    return tokencode(symbol);
   }
   else {
     if (sourceCodeFile->eof()) {
@@ -84,10 +80,21 @@ TokenCodes LexicalAnalyzer::parse() {
     }
   }
 }
+TokenCodes LexicalAnalyzer::tokencode(char symbol) {
+  if (isalpha(symbol)) {
+      return IDENT;
+    }
+    else if (isdigit(symbol)){
+      return NUMLIT;
+    }
+    else {
+    }
+}
 void LexicalAnalyzer::nextnonwhitespace() {
   char symbol = line.at(getCurrentCharPositionNumber());
-  while(isspace(symbol)) {
+  while(symbol == ' ' || symbol == '\t') {
     current_character_position++;
+    symbol = line.at(getCurrentCharPositionNumber());
   }
 }
 void LexicalAnalyzer::loadnextline() {

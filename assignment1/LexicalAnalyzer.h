@@ -19,6 +19,7 @@ class LexicalAnalyzer
 
     /* TokenCodes function */
     TokenCodes parse();
+    TokenCodes tokencode(char);
 
     /* void function */
     void nextnonwhitespace();
