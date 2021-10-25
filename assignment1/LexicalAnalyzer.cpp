@@ -30,40 +30,51 @@ Token* LexicalAnalyzer::getNextToken()
   t = new Token();
 
   TokenCodes token_class = tokencode(lexeme[0]);
+  
   switch(token_class) {
     case IDENT:
-      token_class = tokencode(line.front());
+      token_class = tokencode(nextcharacter());
       while(token_class == IDENT || token_class == NUMLIT) {
         parse();
-        token_class = tokencode(line.front());
+        token_class = tokencode(nextcharacter());
       }
-      t->setLexemeNumber(getCurrentCharPositionNumber());
+      t->setLexemeNumber(0);
       t->setLexemeString(lexeme);
       t->setTokenCode(lookup(lexeme));
       break;
     case NUMLIT:
-      token_class = tokencode(line.front());
+      token_class = tokencode(nextcharacter());
       while(token_class == NUMLIT) {
         parse();
-        token_class = tokencode(line.front());
+        token_class = tokencode(nextcharacter());
       }
-      t->setLexemeNumber(getCurrentCharPositionNumber());
+      t->setLexemeNumber(atoi(lexeme));
       t->setLexemeString(lexeme);
       t->setTokenCode(NUMLIT);
       break;
     case NEWLINE:
-      t->setLexemeNumber(getCurrentCharPositionNumber());
+      t->setLexemeNumber(0);
       t->setLexemeString("\\n");
       t->setTokenCode(NEWLINE);
       nextline();
       break;
     case EOI:
-      t->setLexemeNumber(getCurrentCharPositionNumber());
+      t->setLexemeNumber(0);
       t->setLexemeString("EOI");
       t->setTokenCode(token_class);
       break;
+    case NAL:
+      token_class = tokencode(nextcharacter());
+      while (token_class == NAL) {
+        parse();
+        token_class = tokencode(nextcharacter());
+      }
+      t->setLexemeNumber(0);
+      t->setLexemeString(lexeme);
+      t->setTokenCode(NAL);
+      break;
     default:
-      t->setLexemeNumber(getCurrentCharPositionNumber());
+      t->setLexemeNumber(0);
       token_class = lookup(lexeme);
       t->setLexemeString(lexeme);
       t->setTokenCode(token_class);
@@ -115,6 +126,8 @@ TokenCodes LexicalAnalyzer::tokencode(char c) {
           return LSS;
         case '>':
           return GTR;
+        case '\n':
+          return NEWLINE;
         default:
           return NAL;
       }
@@ -124,9 +137,7 @@ TokenCodes LexicalAnalyzer::tokencode(char c) {
     if (sourceCodeFile->eof()) {
       return EOI;
     }
-    else {
-      return NEWLINE;
-    }
+    return NEWLINE;
   }
 }
 TokenCodes LexicalAnalyzer::lookup(char* token) {
@@ -229,6 +240,7 @@ char* LexicalAnalyzer::lower(char* token) {
   }
   return lowercase;
 }
+
 char LexicalAnalyzer::nextcharacter() {
   return line.front();
 }
